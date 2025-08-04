@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "moto-scan-ai",
+			"path": ".."
+		},
+		{
+			"name": "backend",
+			"path": "../../Specialisation/backend"
+		}
+	],
+	"settings": {}
+}
