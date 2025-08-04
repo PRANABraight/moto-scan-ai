@@ -1,51 +1,26 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from typing import List
-import uvicorn
+from app.db.database import create_db_and_tables
+from app.api.v1.endpoints import damage_detection # Assuming you have an __init__.py in endpoints
 
-from database import SessionLocal, engine
-from models import Base
-from routers import specializations, users, auth
+app = FastAPI()
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(
-    title="Specialization Management API",
-    description="A comprehensive API for managing specializations and related data",
-    version="1.0.0"
-)
-
-# CORS middleware
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly for production
+    allow_origins=["http://localhost:3000"],  # Adjust if your frontend runs elsewhere
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dependency to get database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Include your API routers
+app.include_router(damage_detection.router)
 
-# Include routers
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(users.router, prefix="/api/users", tags=["Users"])
-app.include_router(specializations.router, prefix="/api/specializations", tags=["Specializations"])
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 @app.get("/")
 async def root():
-    return {"message": "Specialization Management API", "version": "1.0.0"}
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    return {"message": "Hello, World!"}
